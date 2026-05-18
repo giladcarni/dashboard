@@ -99,6 +99,14 @@ body.light-theme .cap-breakdown, body.light-theme .input-group { background: #ff
 body.light-theme .input-group input { color: #1a2a3a; }
 body.light-theme .tooltip-popup { background: #f0f4f8; border-color: #c8d6e5; color: #1a2a3a; }
 body.light-theme .tooltip-popup::after { border-top-color: #f0f4f8; }
+body.light-theme .ins-overview-table thead th,
+body.light-theme .ins-policy-table thead th { background: #ffffff; }
+body.light-theme .ins-status-active { background:rgba(0,136,74,0.1); color:var(--accent2); border-color:rgba(0,136,74,0.3); }
+body.light-theme .ins-status-expiring { background:rgba(196,120,0,0.1); color:var(--warn); border-color:rgba(196,120,0,0.3); }
+body.light-theme .ins-status-expired { background:rgba(204,34,68,0.1); color:var(--danger); border-color:rgba(204,34,68,0.3); }
+body.light-theme .ins-current-row { background:rgba(0,136,74,0.04); }
+body.light-theme .ins-back-btn { background: #f4f7fb; border-color: #c8d6e5; }
+body.light-theme .add-policy-btn { border-color: var(--accent); }
 .theme-toggle-wrap { display:flex; align-items:center; gap:8px; margin-bottom:18px; justify-content:center; }
 .theme-toggle-wrap span { font-size:11px; color:var(--muted); font-family:var(--mono); letter-spacing:1px; }
 .theme-toggle { position:relative; width:48px; height:26px; }
@@ -247,6 +255,36 @@ table.ledger .action-cell{width:60px;text-align:right;}
 .bar-outer{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
 .bar-inner{height:100%;border-radius:3px;transition:width .5s ease;}
 .bar-val{font-family:var(--mono);font-size:9px;width:55px;text-align:right;flex-shrink:0;}
+
+/* ── INSURANCE OVERVIEW ── */
+.ins-overview-table{width:100%;border-collapse:collapse;}
+.ins-overview-table thead th{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);padding:10px 14px;border-bottom:1px solid var(--border);text-align:left;background:var(--surface);white-space:nowrap;}
+.ins-overview-table tbody tr{border-bottom:1px solid rgba(26,45,69,0.5);transition:background .15s;cursor:pointer;}
+.ins-overview-table tbody tr:hover{background:var(--surface2);}
+.ins-overview-table tbody td{padding:10px 14px;font-size:12px;}
+.ins-addr-link{color:var(--accent);font-weight:700;text-decoration:none;cursor:pointer;font-size:13px;}
+.ins-addr-link:hover{text-decoration:underline;}
+.ins-status-badge{font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 7px;border-radius:3px;text-transform:uppercase;}
+.ins-status-active{background:rgba(0,255,163,0.12);color:var(--accent2);border:1px solid rgba(0,255,163,0.3);}
+.ins-status-expiring{background:rgba(255,170,0,0.12);color:var(--warn);border:1px solid rgba(255,170,0,0.3);}
+.ins-status-expired{background:rgba(255,77,109,0.12);color:var(--danger);border:1px solid rgba(255,77,109,0.3);}
+.ins-status-none{background:rgba(100,116,139,0.12);color:var(--muted);border:1px solid rgba(100,116,139,0.3);}
+.ins-detail-panel{display:none;}
+.ins-detail-panel.active{display:block;}
+.ins-back-btn{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding:6px 14px;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:4px;cursor:pointer;margin-bottom:20px;transition:all .2s;}
+.ins-back-btn:hover{border-color:var(--accent);color:var(--accent);}
+.ins-policy-table{width:100%;border-collapse:collapse;margin-top:12px;}
+.ins-policy-table thead th{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);padding:9px 13px;border-bottom:1px solid var(--border);text-align:left;background:var(--surface);white-space:nowrap;}
+.ins-policy-table tbody tr{border-bottom:1px solid rgba(26,45,69,0.5);transition:background .15s;}
+.ins-policy-table tbody tr:hover{background:var(--surface2);}
+.ins-policy-table tbody td{padding:9px 13px;font-size:12px;}
+.ins-current-row{background:rgba(0,255,163,0.04);}
+.ins-current-row td:first-child{border-left:3px solid var(--accent2);}
+.ins-history-row td:first-child{border-left:3px solid transparent;}
+.add-policy-btn{font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding:8px 16px;background:transparent;border:1px solid var(--accent);color:var(--accent);border-radius:4px;cursor:pointer;transition:all .2s;}
+.add-policy-btn:hover{background:var(--accent);color:#000;}
+.del-policy-btn{font-size:9px;padding:2px 7px;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:2px;cursor:pointer;transition:all .15s;}
+.del-policy-btn:hover{border-color:var(--danger);color:var(--danger);}
 
 /* ── PROPERTY MODAL ── */
 #modal-overlay{display:none;position:fixed;inset:0;background:rgba(2,8,18,0.93);z-index:999;backdrop-filter:blur(4px);overflow-y:auto;}
@@ -819,6 +857,7 @@ table.rc-table tbody td{padding:8px 14px;}
     <div class="op-ptab" id="op-subtab-rentcol" onclick="switchOpSubTab('rentcol')" style="font-size:12px;padding:12px 22px;">💰 Rent Collection</div>
     <div class="op-ptab" id="op-subtab-upcoming" onclick="switchOpSubTab('upcoming')" style="font-size:12px;padding:12px 22px;">📅 Upcoming</div>
     <div class="op-ptab" id="op-subtab-ll152" onclick="switchOpSubTab('ll152')" style="font-size:12px;padding:12px 22px;">🔍 LL152</div>
+    <div class="op-ptab" id="op-subtab-insurance" onclick="switchOpSubTab('insurance')" style="font-size:12px;padding:12px 22px;">🛡 Insurance</div>
   </div>
 
   <!-- BUILDINGS panel -->
@@ -889,6 +928,67 @@ table.rc-table tbody td{padding:8px 14px;}
     <div id="upcoming-alert-banner" style="display:none;background:rgba(255,77,109,0.15);border:1px solid var(--danger);border-radius:8px;padding:14px 18px;margin-bottom:18px;color:var(--danger);font-weight:700;font-size:13px;"></div>
 
     <div id="upcoming-list"></div>
+  </div>
+
+  <!-- INSURANCE OVERVIEW panel -->
+  <div id="op-sub-insurance" style="display:none;">
+    <!-- Overview list -->
+    <div id="ins-overview-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:18px;font-weight:700;">🛡 Insurance Portfolio</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Summary of all active policies. Click a property to view full policy history.</div>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="ins-overview-table" id="ins-overview-table">
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Insurance Company</th>
+              <th>Policy Start</th>
+              <th>Policy End</th>
+              <th>Annual Premium</th>
+              <th>Coverage</th>
+              <th>Deductible</th>
+              <th>Status</th>
+              <th>History</th>
+            </tr>
+          </thead>
+          <tbody id="ins-overview-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Drill-down: single property policy history -->
+    <div id="ins-detail-panel" class="ins-detail-panel">
+      <button class="ins-back-btn" onclick="showInsOverview()">← Back to All Properties</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div id="ins-detail-addr" style="font-size:18px;font-weight:700;"></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">All policies — current first, then history oldest to newest</div>
+        </div>
+        <button class="add-policy-btn" id="ins-add-btn" onclick="addInsurancePolicy(currentInsPropId)">+ Add Policy</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="ins-policy-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Insurance Company</th>
+              <th>Since</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Annual Premium ($)</th>
+              <th>Coverage ($)</th>
+              <th>Deductible ($)</th>
+              <th>Comments</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="ins-detail-tbody"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <!-- LL152 panel -->
@@ -2386,6 +2486,14 @@ async function loadAllFromSupabase(){
       const loaded = JSON.parse(opRow.data);
       Object.keys(loaded).forEach(k=>{ OP_DATA[k] = loaded[k]; });
     }
+    // Migrate old single-policy insurance to array if needed
+    Object.keys(OP_DATA).forEach(propId=>{
+      const d = OP_DATA[propId];
+      if(d && !d.insurancePolicies) d.insurancePolicies = [];
+      if(d && d.insurancePolicies.length === 0 && d.insurance && d.insurance.company){
+        d.insurancePolicies.push({ ...d.insurance, _id: Date.now()+'_'+propId });
+      }
+    });
     const rcRows = await sbGet('rc_data');
     const rcRow = rcRows && rcRows.find(r=>r.id==='main');
     if(rcRow && rcRow.data) RC_DATA = JSON.parse(rcRow.data);
@@ -2583,6 +2691,7 @@ function initOpData(){
         super: { name:'', phone:'' },
         tenants: apts.map(apt=>({ apt, tenant:'', phone:'', rent:'', rhino:'', leaseStart:'', leaseEnd:'', comments:'', broker:'', guarantor:'', guarantorPhone:'' })),
         insurance: { company:'', since:'', startDate:'', endDate:'', premium:'', coverage:'', deductible:'', comments:'' },
+        insurancePolicies: [],
         boiler: { brand:'', type:'', dateInstalled:'', cost:'', comments:'' },
         expenses: { taxes:'', water:'', heat:'', electric:'', insurance:'', repair:'', legal:'', accountant:'', super:'', management:'', commissions:'', interest:'' },
         maintenance: [],
@@ -2729,18 +2838,33 @@ function buildBldgPanel(p, isActive){
 
     <!-- INSURANCE TAB -->
     <div class="op-tab-content" id="optc-${p.id}-insurance">
-      <div class="op-section-title" style="margin-top:0">Insurance Details</div>
-      <div class="op-info-grid">
-        ${[
-          ['company','Company Name','text'],['since','Since','text'],['startDate','Start Date (MM/DD/YYYY)','text'],
-          ['endDate','End Date (MM/DD/YYYY)','text'],['premium','Annual Premium ($)','number'],['coverage','Coverage Amount ($)','number'],
-          ['deductible','Deductible ($)','number'],['comments','Comments','text']
-        ].map(([k,lbl,type])=>`
-        <div class="op-info-box">
-          <div class="op-info-label">${lbl}</div>
-          <input class="op-info-input" type="${type}" value="${d.insurance[k]||''}" placeholder="${lbl}..." onchange="OP_DATA['${p.id}'].insurance['${k}']=this.value;scheduleSave()"/>
-        </div>`).join('')}
+      <div class="op-section-title" style="margin-top:0">Insurance Policies — ${p.addr}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Manage current and historical policies. Current policy (latest expiry) appears first.</div>
+      <div style="margin-bottom:12px;">
+        <button class="add-policy-btn" onclick="addInsurancePolicyFromBldg('${p.id}')">+ Add Policy</button>
       </div>
+      <div style="overflow-x:auto;">
+        <table class="ins-policy-table" id="ins-bldg-table-${p.id}">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Insurance Company</th>
+              <th>Since</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Annual Premium ($)</th>
+              <th>Coverage ($)</th>
+              <th>Deductible ($)</th>
+              <th>Comments</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="ins-bldg-tbody-${p.id}">
+            <tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="op-save-note">✎ All fields auto-save. Use the 🛡 Insurance tab above for a full portfolio view.</div>
     </div>
 
     <!-- BOILER TAB -->
@@ -2850,6 +2974,7 @@ function switchOpTab(propId, tab){
     document.getElementById('optab-'+propId+'-'+t).classList.toggle('active',t===tab);
     document.getElementById('optc-'+propId+'-'+t).classList.toggle('active',t===tab);
   });
+  if(tab === 'insurance') renderInsBldgTable(propId);
 }
 
 function expLabel(k){
@@ -3007,7 +3132,7 @@ function filterLeases(f){
 }
 
 function switchOpSubTab(sub){
-  ['buildings','leases','rentcol','upcoming','ll152'].forEach(s=>{
+  ['buildings','leases','rentcol','upcoming','ll152','insurance'].forEach(s=>{
     document.getElementById('op-sub-'+s).style.display = s===sub ? 'block' : 'none';
     document.getElementById('op-subtab-'+s).classList.toggle('active', s===sub);
   });
@@ -3015,6 +3140,7 @@ function switchOpSubTab(sub){
   if(sub==='rentcol') buildRentCollection();
   if(sub==='upcoming') renderUpcoming();
   if(sub==='ll152') renderLL152List();
+  if(sub==='insurance') buildInsuranceOverview();
 }
 
 // ══════════════════════════════════════════════════
@@ -3517,6 +3643,227 @@ function exportBoth(){
   exportToExcel();
   setTimeout(()=>exportOperational(), 600);
 }
+
+// ══════════════════════════════════════════════════
+//  INSURANCE PORTFOLIO
+// ══════════════════════════════════════════════════
+let currentInsPropId = null;
+
+function getInsurancePolicies(propId){
+  initOpData();
+  const d = OP_DATA[propId];
+  // Migrate old single-policy structure if needed
+  if(!d.insurancePolicies) d.insurancePolicies = [];
+  if(d.insurancePolicies.length === 0 && d.insurance && d.insurance.company){
+    d.insurancePolicies.push({ ...d.insurance, _id: Date.now() });
+  }
+  return d.insurancePolicies;
+}
+
+function insStatusFor(endDate){
+  if(!endDate) return { label:'No Date', cls:'none' };
+  const today = new Date(); today.setHours(0,0,0,0);
+  const end = new Date(toYMD(endDate));
+  const days = Math.round((end - today) / 86400000);
+  if(days < 0) return { label:'EXPIRED', cls:'expired' };
+  if(days <= 60) return { label:'EXPIRING SOON', cls:'expiring' };
+  return { label:'ACTIVE', cls:'active' };
+}
+
+function buildInsuranceOverview(){
+  initOpData();
+  document.getElementById('ins-overview-panel').style.display = 'block';
+  document.getElementById('ins-detail-panel').classList.remove('active');
+
+  const tbody = document.getElementById('ins-overview-tbody');
+  tbody.innerHTML = PROPS.map(p=>{
+    const policies = getInsurancePolicies(p.id);
+    // Current policy = most recent (latest endDate or first in array)
+    let current = null;
+    if(policies.length > 0){
+      // sort by endDate descending, pick first
+      const sorted = [...policies].sort((a,b)=>{
+        if(!a.endDate && !b.endDate) return 0;
+        if(!a.endDate) return 1;
+        if(!b.endDate) return -1;
+        return new Date(toYMD(b.endDate)) - new Date(toYMD(a.endDate));
+      });
+      current = sorted[0];
+    }
+
+    const st = current ? insStatusFor(current.endDate) : { label:'NONE', cls:'none' };
+    const fmtMoney = v => v ? '$'+parseFloat(v).toLocaleString() : '—';
+    const typeColor = p.type==='owned' ? 'var(--accent2)' : 'var(--warn)';
+    return `<tr onclick="showInsPropDetail('${p.id}')">
+      <td><span class="ins-addr-link" style="color:${typeColor}">${p.addr}</span><br><span style="font-size:10px;color:var(--muted)">${p.entity}</span></td>
+      <td style="font-weight:600">${current && current.company ? current.company : '<span style="color:var(--muted)">—</span>'}</td>
+      <td style="font-family:var(--mono);font-size:11px">${current && current.startDate ? current.startDate : '—'}</td>
+      <td style="font-family:var(--mono);font-size:11px">${current && current.endDate ? current.endDate : '—'}</td>
+      <td style="font-family:var(--mono);color:var(--accent2)">${current ? fmtMoney(current.premium) : '—'}</td>
+      <td style="font-family:var(--mono)">${current ? fmtMoney(current.coverage) : '—'}</td>
+      <td style="font-family:var(--mono)">${current ? fmtMoney(current.deductible) : '—'}</td>
+      <td><span class="ins-status-badge ins-status-${st.cls}">${st.label}</span></td>
+      <td style="color:var(--muted);font-size:11px">${policies.length > 1 ? policies.length+' policies' : policies.length === 1 ? '1 policy' : '<span style="color:var(--muted)">—</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function showInsPropDetail(propId){
+  currentInsPropId = propId;
+  const p = PROPS.find(x=>x.id===propId);
+  document.getElementById('ins-overview-panel').style.display = 'none';
+  document.getElementById('ins-detail-panel').classList.add('active');
+  document.getElementById('ins-detail-addr').textContent = p ? p.addr : '';
+  renderInsPolicyTable(propId);
+}
+
+function showInsOverview(){
+  currentInsPropId = null;
+  document.getElementById('ins-overview-panel').style.display = 'block';
+  document.getElementById('ins-detail-panel').classList.remove('active');
+  buildInsuranceOverview();
+}
+
+function renderInsPolicyTable(propId){
+  const policies = getInsurancePolicies(propId);
+  const tbody = document.getElementById('ins-detail-tbody');
+  if(!tbody) return;
+
+  if(policies.length === 0){
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:30px;">No policies yet. Click "+ Add Policy" to add the current insurance.</td></tr>';
+    return;
+  }
+
+  // Sort: most recent endDate first
+  const sorted = [...policies].sort((a,b)=>{
+    if(!a.endDate && !b.endDate) return 0;
+    if(!a.endDate) return 1;
+    if(!b.endDate) return -1;
+    return new Date(toYMD(b.endDate)) - new Date(toYMD(a.endDate));
+  });
+
+  const fmtMoney = v => v ? '$'+parseFloat(v).toLocaleString() : '—';
+
+  tbody.innerHTML = sorted.map((pol, idx)=>{
+    const st = insStatusFor(pol.endDate);
+    const isCurrent = idx === 0;
+    const rowCls = isCurrent ? 'ins-current-row' : 'ins-history-row';
+    return `<tr class="${rowCls}">
+      <td><span class="ins-status-badge ins-status-${st.cls}">${isCurrent ? 'CURRENT' : 'HISTORY'}</span></td>
+      <td><input type="text" value="${pol.company||''}" placeholder="Insurance co." style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;font-weight:${isCurrent?700:400};padding:2px 0;outline:none;width:150px;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','company',this.value)"/></td>
+      <td><input type="text" value="${pol.since||''}" placeholder="Year" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;width:70px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','since',this.value)"/></td>
+      <td><input type="text" value="${pol.startDate||''}" placeholder="MM/DD/YYYY" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;width:110px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','startDate',this.value)"/></td>
+      <td><input type="text" value="${pol.endDate||''}" placeholder="MM/DD/YYYY" style="background:transparent;border:none;border-bottom:1px solid transparent;color:${st.cls==='expired'?'var(--danger)':st.cls==='expiring'?'var(--warn)':'var(--text)'};font-size:12px;width:110px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','endDate',this.value)"/></td>
+      <td><input type="number" value="${pol.premium||''}" placeholder="0" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--accent2);font-family:var(--mono);font-size:12px;width:90px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','premium',this.value)"/></td>
+      <td><input type="number" value="${pol.coverage||''}" placeholder="0" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-family:var(--mono);font-size:12px;width:100px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','coverage',this.value)"/></td>
+      <td><input type="number" value="${pol.deductible||''}" placeholder="0" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-family:var(--mono);font-size:12px;width:90px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','deductible',this.value)"/></td>
+      <td><input type="text" value="${pol.comments||''}" placeholder="Comments..." style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--muted);font-size:12px;width:160px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','comments',this.value)"/></td>
+      <td><button class="del-policy-btn" onclick="deleteInsPolicy('${propId}','${pol._id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateInsPolicyField(propId, policyId, field, value){
+  const policies = getInsurancePolicies(propId);
+  const pol = policies.find(p=>String(p._id)===String(policyId));
+  if(pol){ pol[field] = value; }
+  // Also keep legacy insurance field in sync with current (first) policy
+  syncLegacyInsurance(propId);
+  scheduleSave();
+}
+
+function syncLegacyInsurance(propId){
+  const policies = getInsurancePolicies(propId);
+  if(policies.length > 0){
+    const sorted = [...policies].sort((a,b)=>{
+      if(!a.endDate && !b.endDate) return 0;
+      if(!a.endDate) return 1;
+      if(!b.endDate) return -1;
+      return new Date(toYMD(b.endDate)) - new Date(toYMD(a.endDate));
+    });
+    OP_DATA[propId].insurance = { ...sorted[0] };
+  }
+}
+
+function addInsurancePolicy(propId){
+  initOpData();
+  if(!OP_DATA[propId].insurancePolicies) OP_DATA[propId].insurancePolicies = [];
+  const newPol = { _id: Date.now(), company:'', since:'', startDate:'', endDate:'', premium:'', coverage:'', deductible:'', comments:'' };
+  OP_DATA[propId].insurancePolicies.unshift(newPol);
+  renderInsPolicyTable(propId);
+  scheduleSave();
+}
+
+function deleteInsPolicy(propId, policyId){
+  if(!confirm('Delete this policy entry?')) return;
+  OP_DATA[propId].insurancePolicies = OP_DATA[propId].insurancePolicies.filter(p=>String(p._id)!==String(policyId));
+  syncLegacyInsurance(propId);
+  renderInsPolicyTable(propId);
+  scheduleSave();
+}
+
+function addInsurancePolicyFromBldg(propId){
+  addInsurancePolicy(propId);
+  renderInsBldgTable(propId);
+}
+
+function deleteInsPolicyFromBldg(propId, policyId){
+  if(!confirm('Delete this policy entry?')) return;
+  OP_DATA[propId].insurancePolicies = OP_DATA[propId].insurancePolicies.filter(p=>String(p._id)!==String(policyId));
+  syncLegacyInsurance(propId);
+  renderInsBldgTable(propId);
+  scheduleSave();
+}
+
+function renderInsBldgTable(propId){
+  const tbody = document.getElementById('ins-bldg-tbody-'+propId);
+  if(!tbody) return;
+  const policies = getInsurancePolicies(propId);
+  if(policies.length === 0){
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px;">No policies yet. Click "+ Add Policy" above.</td></tr>';
+    return;
+  }
+  const sorted = [...policies].sort((a,b)=>{
+    if(!a.endDate && !b.endDate) return 0;
+    if(!a.endDate) return 1;
+    if(!b.endDate) return -1;
+    return new Date(toYMD(b.endDate)) - new Date(toYMD(a.endDate));
+  });
+  tbody.innerHTML = sorted.map((pol,idx)=>{
+    const st = insStatusFor(pol.endDate);
+    const isCurrent = idx===0;
+    const rowCls = isCurrent ? 'ins-current-row' : 'ins-history-row';
+    return `<tr class="${rowCls}">
+      <td><span class="ins-status-badge ins-status-${st.cls}">${isCurrent?'CURRENT':'HISTORY'}</span></td>
+      <td><input type="text" value="${pol.company||''}" placeholder="Insurance co." style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;font-weight:${isCurrent?700:400};width:150px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','company',this.value)"/></td>
+      <td><input type="text" value="${pol.since||''}" placeholder="Year" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;width:70px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','since',this.value)"/></td>
+      <td><input type="text" value="${pol.startDate||''}" placeholder="MM/DD/YYYY" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;width:110px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','startDate',this.value)"/></td>
+      <td><input type="text" value="${pol.endDate||''}" placeholder="MM/DD/YYYY" style="background:transparent;border:none;border-bottom:1px solid transparent;color:${st.cls==='expired'?'var(--danger)':st.cls==='expiring'?'var(--warn)':'var(--text)'};font-size:12px;width:110px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','endDate',this.value)"/></td>
+      <td><input type="number" value="${pol.premium||''}" placeholder="0" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--accent2);font-family:var(--mono);font-size:12px;width:90px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','premium',this.value)"/></td>
+      <td><input type="number" value="${pol.coverage||''}" placeholder="0" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-family:var(--mono);font-size:12px;width:100px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','coverage',this.value)"/></td>
+      <td><input type="number" value="${pol.deductible||''}" placeholder="0" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-family:var(--mono);font-size:12px;width:90px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','deductible',this.value)"/></td>
+      <td><input type="text" value="${pol.comments||''}" placeholder="Comments..." style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--muted);font-size:12px;width:150px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','comments',this.value)"/></td>
+      <td><button class="del-policy-btn" onclick="deleteInsPolicyFromBldg('${propId}','${pol._id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  SUPABASE KEEP-ALIVE (prevents free-tier pausing)
+// ══════════════════════════════════════════════════
+async function pingSupabase(){
+  if(!SB_URL || !SB_KEY) return;
+  try {
+    await fetch(SB_URL+'/rest/v1/op_data?select=id&limit=1', {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer '+SB_KEY }
+    });
+    console.log('[keep-alive] Supabase pinged at', new Date().toLocaleTimeString());
+  } catch(e){ console.warn('[keep-alive] ping failed', e); }
+}
+// Ping every 4 days (345,600,000 ms) to stay under the 7-day inactivity threshold
+setInterval(pingSupabase, 345600000);
+// Also ping once 5 minutes after login
+setTimeout(()=>{ if(SB_URL) pingSupabase(); }, 300000);
 
 // INIT — wait for password
 document.getElementById('pw-input').focus();
