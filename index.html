@@ -946,12 +946,14 @@ table.rc-table tbody td{padding:8px 14px;}
             <tr>
               <th>Property</th>
               <th>Insurance Company</th>
-              <th>Agent</th>
               <th>Policy Start</th>
               <th>Policy End</th>
               <th>Annual Premium</th>
               <th>Coverage</th>
               <th>Deductible</th>
+              <th>Income</th>
+              <th>SQ</th>
+              <th>Pay By</th>
               <th>Status</th>
               <th>History</th>
             </tr>
@@ -976,12 +978,15 @@ table.rc-table tbody td{padding:8px 14px;}
             <tr>
               <th>Status</th>
               <th>Insurance Company</th>
-              <th>Agent</th>
+              <th>Since</th>
               <th>Start Date</th>
               <th>End Date</th>
               <th>Annual Premium ($)</th>
               <th>Coverage ($)</th>
               <th>Deductible ($)</th>
+              <th>Income ($)</th>
+              <th>SQ ft</th>
+              <th>Pay By</th>
               <th>Comments</th>
               <th></th>
             </tr>
@@ -2690,7 +2695,7 @@ function initOpData(){
       const apts = APT_LAYOUTS[p.id]||['1R','1L','2R','2L'];
       OP_DATA[p.id] = {
         super: { name:'', phone:'' },
-        tenants: apts.map(apt=>({ apt, tenant:'', phone:'', rent:'', income:'', sf:'', rhino:'', leaseStart:'', leaseEnd:'', comments:'', broker:'', guarantor:'', guarantorPhone:'' })),
+        tenants: apts.map(apt=>({ apt, tenant:'', phone:'', rent:'', rhino:'', leaseStart:'', leaseEnd:'', comments:'', broker:'', guarantor:'', guarantorPhone:'' })),
         insurance: { company:'', since:'', startDate:'', endDate:'', premium:'', coverage:'', deductible:'', comments:'' },
         insurancePolicies: [],
         boiler: { brand:'', type:'', dateInstalled:'', cost:'', comments:'' },
@@ -2760,8 +2765,6 @@ function buildBldgPanel(p, isActive){
             <th>Tenant Name</th>
             <th>Phone</th>
             <th>Monthly Rent ($)</th>
-            <th>Income ($)</th>
-            <th>SF</th>
             <th>Rhino #</th>
             <th>Broker</th>
             <th>Lease Start</th>
@@ -2776,12 +2779,10 @@ function buildBldgPanel(p, isActive){
               <td data-label="Tenant"><input type="text" value="${t.tenant||''}" placeholder="Tenant name" onchange="OP_DATA['${p.id}'].tenants[${idx}].tenant=this.value;scheduleSave()"/></td>
               <td data-label="Phone"><input type="tel" value="${t.phone||''}" placeholder="(718) 000-0000" style="min-width:120px" onchange="OP_DATA['${p.id}'].tenants[${idx}].phone=this.value;scheduleSave()"/></td>
               <td data-label="Rent $"><input type="number" value="${t.rent||''}" placeholder="0" style="max-width:90px" onchange="OP_DATA['${p.id}'].tenants[${idx}].rent=this.value;updateTenantTotal('${p.id}');scheduleSave()"/></td>
-              <td data-label="Income $"><input type="number" value="${t.income||''}" placeholder="0" style="max-width:110px" onchange="OP_DATA['${p.id}'].tenants[${idx}].income=this.value;scheduleSave()"/></td>
-              <td data-label="SF"><input type="number" value="${t.sf||''}" placeholder="0" style="max-width:80px" onchange="OP_DATA['${p.id}'].tenants[${idx}].sf=this.value;scheduleSave()"/></td>
               <td data-label="Rhino #"><input type="text" value="${t.rhino||''}" placeholder="#" style="min-width:80px" onchange="OP_DATA['${p.id}'].tenants[${idx}].rhino=this.value;scheduleSave()"/></td>
               <td data-label="Broker"><input type="text" value="${t.broker||''}" placeholder="Broker name" onchange="OP_DATA['${p.id}'].tenants[${idx}].broker=this.value;scheduleSave()"/></td>
-              <td data-label="Lease Start"><input type="date" value="${toYMD(t.leaseStart||'')}" style="min-width:140px" onchange="OP_DATA['${p.id}'].tenants[${idx}].leaseStart=fmtDate(this.value);scheduleSave()"/></td>
-              <td data-label="Lease End"><input type="date" value="${toYMD(t.leaseEnd||'')}" style="min-width:140px" onchange="OP_DATA['${p.id}'].tenants[${idx}].leaseEnd=fmtDate(this.value);scheduleSave()"/></td>
+              <td data-label="Lease Start"><input type="text" value="${t.leaseStart||''}" placeholder="MM/DD/YYYY" style="min-width:110px" onchange="OP_DATA['${p.id}'].tenants[${idx}].leaseStart=this.value;scheduleSave()"/></td>
+              <td data-label="Lease End"><input type="text" value="${t.leaseEnd||''}" placeholder="MM/DD/YYYY" style="min-width:110px" onchange="OP_DATA['${p.id}'].tenants[${idx}].leaseEnd=this.value;scheduleSave()"/></td>
               <td data-label="Guarantor"><input type="text" value="${t.guarantor||''}" placeholder="Guarantor name" style="min-width:130px" onchange="OP_DATA['${p.id}'].tenants[${idx}].guarantor=this.value;scheduleSave()"/></td>
               <td data-label="Guar. Phone"><input type="tel" value="${t.guarantorPhone||''}" placeholder="(718) 000-0000" style="min-width:120px" onchange="OP_DATA['${p.id}'].tenants[${idx}].guarantorPhone=this.value;scheduleSave()"/></td>
             </tr>`).join('')}
@@ -2854,18 +2855,21 @@ function buildBldgPanel(p, isActive){
             <tr>
               <th>Status</th>
               <th>Insurance Company</th>
-              <th>Agent</th>
+              <th>Since</th>
               <th>Start Date</th>
               <th>End Date</th>
               <th>Annual Premium ($)</th>
               <th>Coverage ($)</th>
               <th>Deductible ($)</th>
+              <th>Income ($)</th>
+              <th>SQ ft</th>
+              <th>Pay By</th>
               <th>Comments</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="ins-bldg-tbody-${p.id}">
-            <tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px;">Loading...</td></tr>
+            <tr><td colspan="13" style="text-align:center;color:var(--muted);padding:20px;">Loading...</td></tr>
           </tbody>
         </table>
       </div>
@@ -3702,12 +3706,14 @@ function buildInsuranceOverview(){
     return `<tr onclick="showInsPropDetail('${p.id}')">
       <td><span class="ins-addr-link" style="color:${typeColor}">${p.addr}</span><br><span style="font-size:10px;color:var(--muted)">${p.entity}</span></td>
       <td style="font-weight:600">${current && current.company ? current.company : '<span style="color:var(--muted)">—</span>'}</td>
-      <td style="font-size:12px;color:var(--muted)">${current && current.agent ? current.agent : '—'}</td>
       <td style="font-family:var(--mono);font-size:11px">${current && current.startDate ? current.startDate : '—'}</td>
       <td style="font-family:var(--mono);font-size:11px">${current && current.endDate ? current.endDate : '—'}</td>
       <td style="font-family:var(--mono);color:var(--accent2)">${current ? fmtMoney(current.premium) : '—'}</td>
       <td style="font-family:var(--mono)">${current ? fmtMoney(current.coverage) : '—'}</td>
       <td style="font-family:var(--mono)">${current ? fmtMoney(current.deductible) : '—'}</td>
+      <td style="font-family:var(--mono);color:var(--accent2)">${current ? fmtMoney(current.income) : '—'}</td>
+      <td style="font-family:var(--mono)">${current && current.sq ? current.sq : '—'}</td>
+      <td style="font-size:11px">${current && current.payBy ? current.payBy : '—'}</td>
       <td><span class="ins-status-badge ins-status-${st.cls}">${st.label}</span></td>
       <td style="color:var(--muted);font-size:11px">${policies.length > 1 ? policies.length+' policies' : policies.length === 1 ? '1 policy' : '<span style="color:var(--muted)">—</span>'}</td>
     </tr>`;
@@ -3736,7 +3742,7 @@ function renderInsPolicyTable(propId){
   if(!tbody) return;
 
   if(policies.length === 0){
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:30px;">No policies yet. Click "+ Add Policy" to add the current insurance.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;color:var(--muted);padding:30px;">No policies yet. Click "+ Add Policy" to add the current insurance.</td></tr>';
     return;
   }
 
@@ -3757,12 +3763,15 @@ function renderInsPolicyTable(propId){
     return `<tr class="${rowCls}">
       <td><span class="ins-status-badge ins-status-${st.cls}">${isCurrent ? 'CURRENT' : 'HISTORY'}</span></td>
       <td><input type="text" value="${pol.company||''}" placeholder="Insurance co." style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;font-weight:${isCurrent?700:400};padding:2px 0;outline:none;width:150px;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','company',this.value)"/></td>
-      <td><input type="text" value="${pol.agent||''}" placeholder="Agent name" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;width:120px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','agent',this.value)"/></td>
-      <td><input type="date" value="${toYMD(pol.startDate||'')}" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;width:140px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','startDate',fmtDate(this.value))"/></td>
-      <td><input type="date" value="${toYMD(pol.endDate||'')}" style="background:transparent;border:none;border-bottom:1px solid transparent;color:${st.cls==='expired'?'var(--danger)':st.cls==='expiring'?'var(--warn)':'var(--text)'};font-size:12px;width:140px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','endDate',fmtDate(this.value))"/></td>
+      <td><input type="text" value="${pol.since||''}" placeholder="Year" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;width:70px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','since',this.value)"/></td>
+      <td><input type="text" value="${pol.startDate||''}" placeholder="MM/DD/YYYY" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;width:110px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','startDate',this.value)"/></td>
+      <td><input type="text" value="${pol.endDate||''}" placeholder="MM/DD/YYYY" style="background:transparent;border:none;border-bottom:1px solid transparent;color:${st.cls==='expired'?'var(--danger)':st.cls==='expiring'?'var(--warn)':'var(--text)'};font-size:12px;width:110px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','endDate',this.value)"/></td>
       <td><input type="number" value="${pol.premium||''}" placeholder="0" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--accent2);font-family:var(--mono);font-size:12px;width:90px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','premium',this.value)"/></td>
       <td><input type="number" value="${pol.coverage||''}" placeholder="0" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-family:var(--mono);font-size:12px;width:100px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','coverage',this.value)"/></td>
       <td><input type="number" value="${pol.deductible||''}" placeholder="0" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-family:var(--mono);font-size:12px;width:90px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','deductible',this.value)"/></td>
+      <td><input type="number" value="${pol.income||''}" placeholder="0" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--accent2);font-family:var(--mono);font-size:12px;width:90px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','income',this.value)"/></td>
+      <td><input type="text" value="${pol.sq||''}" placeholder="e.g. 2400" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-family:var(--mono);font-size:12px;width:75px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','sq',this.value)"/></td>
+      <td><input type="text" value="${pol.payBy||''}" placeholder="e.g. Check" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;width:90px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','payBy',this.value)"/></td>
       <td><input type="text" value="${pol.comments||''}" placeholder="Comments..." style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--muted);font-size:12px;width:160px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','comments',this.value)"/></td>
       <td><button class="del-policy-btn" onclick="deleteInsPolicy('${propId}','${pol._id}')">✕</button></td>
     </tr>`;
@@ -3794,7 +3803,7 @@ function syncLegacyInsurance(propId){
 function addInsurancePolicy(propId){
   initOpData();
   if(!OP_DATA[propId].insurancePolicies) OP_DATA[propId].insurancePolicies = [];
-  const newPol = { _id: Date.now(), company:'', since:'', startDate:'', endDate:'', premium:'', coverage:'', deductible:'', comments:'' };
+  const newPol = { _id: Date.now(), company:'', since:'', startDate:'', endDate:'', premium:'', coverage:'', deductible:'', income:'', sq:'', payBy:'', comments:'' };
   OP_DATA[propId].insurancePolicies.unshift(newPol);
   renderInsPolicyTable(propId);
   scheduleSave();
@@ -3826,7 +3835,7 @@ function renderInsBldgTable(propId){
   if(!tbody) return;
   const policies = getInsurancePolicies(propId);
   if(policies.length === 0){
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px;">No policies yet. Click "+ Add Policy" above.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;color:var(--muted);padding:20px;">No policies yet. Click "+ Add Policy" above.</td></tr>';
     return;
   }
   const sorted = [...policies].sort((a,b)=>{
@@ -3842,12 +3851,15 @@ function renderInsBldgTable(propId){
     return `<tr class="${rowCls}">
       <td><span class="ins-status-badge ins-status-${st.cls}">${isCurrent?'CURRENT':'HISTORY'}</span></td>
       <td><input type="text" value="${pol.company||''}" placeholder="Insurance co." style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;font-weight:${isCurrent?700:400};width:150px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','company',this.value)"/></td>
-      <td><input type="text" value="${pol.agent||''}" placeholder="Agent name" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;width:120px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','agent',this.value)"/></td>
-      <td><input type="date" value="${toYMD(pol.startDate||'')}" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;width:140px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','startDate',fmtDate(this.value))"/></td>
-      <td><input type="date" value="${toYMD(pol.endDate||'')}" style="background:transparent;border:none;border-bottom:1px solid transparent;color:${st.cls==='expired'?'var(--danger)':st.cls==='expiring'?'var(--warn)':'var(--text)'};font-size:12px;width:140px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','endDate',fmtDate(this.value))"/></td>
+      <td><input type="text" value="${pol.since||''}" placeholder="Year" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;width:70px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','since',this.value)"/></td>
+      <td><input type="text" value="${pol.startDate||''}" placeholder="MM/DD/YYYY" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;width:110px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','startDate',this.value)"/></td>
+      <td><input type="text" value="${pol.endDate||''}" placeholder="MM/DD/YYYY" style="background:transparent;border:none;border-bottom:1px solid transparent;color:${st.cls==='expired'?'var(--danger)':st.cls==='expiring'?'var(--warn)':'var(--text)'};font-size:12px;width:110px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','endDate',this.value)"/></td>
       <td><input type="number" value="${pol.premium||''}" placeholder="0" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--accent2);font-family:var(--mono);font-size:12px;width:90px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','premium',this.value)"/></td>
       <td><input type="number" value="${pol.coverage||''}" placeholder="0" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-family:var(--mono);font-size:12px;width:100px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','coverage',this.value)"/></td>
       <td><input type="number" value="${pol.deductible||''}" placeholder="0" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-family:var(--mono);font-size:12px;width:90px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','deductible',this.value)"/></td>
+      <td><input type="number" value="${pol.income||''}" placeholder="0" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--accent2);font-family:var(--mono);font-size:12px;width:90px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','income',this.value)"/></td>
+      <td><input type="text" value="${pol.sq||''}" placeholder="e.g. 2400" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-family:var(--mono);font-size:12px;width:75px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','sq',this.value)"/></td>
+      <td><input type="text" value="${pol.payBy||''}" placeholder="e.g. Check" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;width:90px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','payBy',this.value)"/></td>
       <td><input type="text" value="${pol.comments||''}" placeholder="Comments..." style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--muted);font-size:12px;width:150px;padding:2px 0;outline:none;transition:border-color .2s" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" onchange="updateInsPolicyField('${propId}','${pol._id}','comments',this.value)"/></td>
       <td><button class="del-policy-btn" onclick="deleteInsPolicyFromBldg('${propId}','${pol._id}')">✕</button></td>
     </tr>`;
