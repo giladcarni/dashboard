@@ -326,6 +326,28 @@ table.ledger .action-cell{width:60px;text-align:right;}
 .refi-date{font-family:var(--mono);font-size:10px;color:var(--muted);width:80px;flex-shrink:0;}
 .refi-info{font-size:12px;}
 .refi-amount{font-family:var(--mono);font-size:11px;color:var(--accent2);margin-top:2px;}
+.refi-entry-body{flex:1;}
+.refi-actions{display:flex;gap:6px;margin-top:4px;}
+.refi-btn{font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid var(--border);cursor:pointer;background:var(--surface);color:var(--text);transition:background .15s;}
+.refi-btn:hover{background:var(--border);}
+.refi-btn.del{color:var(--danger);border-color:var(--danger);}
+.refi-btn.del:hover{background:var(--danger);color:#fff;}
+.refi-add-btn{margin-top:12px;width:100%;padding:8px;border:1px dashed var(--border);border-radius:6px;background:transparent;color:var(--accent);font-size:12px;cursor:pointer;transition:background .15s;}
+.refi-add-btn:hover{background:var(--surface);}
+
+/* Refi edit modal */
+#refi-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;}
+#refi-modal-overlay.open{display:flex;}
+.refi-modal-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;width:340px;max-width:95vw;}
+.refi-modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.refi-modal-title{font-size:14px;font-weight:700;}
+.refi-field{margin-bottom:12px;}
+.refi-field label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;}
+.refi-field input{width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;box-sizing:border-box;}
+.refi-modal-footer{display:flex;gap:8px;margin-top:16px;}
+.refi-modal-footer button{flex:1;padding:8px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:600;}
+.refi-save-btn{background:var(--accent);color:#fff;}
+.refi-cancel-btn{background:var(--surface);color:var(--text);border:1px solid var(--border)!important;}
 
 .cap-breakdown{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;}
 .cap-title{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:10px;}
@@ -1143,7 +1165,42 @@ table.rc-table tbody td{padding:8px 14px;}
       <!-- REFI HISTORY -->
       <div class="modal-section" id="ms-refi">
         <div class="refi-timeline" id="m-refi-timeline"></div>
+        <button class="refi-add-btn" onclick="openRefiModal(null)">+ Add Refinance</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REFI EDIT MODAL ══ -->
+<div id="refi-modal-overlay" onclick="closeRefiModal(event)">
+  <div class="refi-modal-box" onclick="event.stopPropagation()">
+    <div class="refi-modal-head">
+      <div class="refi-modal-title" id="refi-modal-title">Add Refinance</div>
+      <div class="modal-close" onclick="closeRefiModal()">×</div>
+    </div>
+    <div class="refi-field">
+      <label>Date (e.g. Jan 2023)</label>
+      <input id="refi-inp-date" placeholder="Mon YYYY">
+    </div>
+    <div class="refi-field">
+      <label>Label</label>
+      <input id="refi-inp-label" placeholder="e.g. First Refinance">
+    </div>
+    <div class="refi-field">
+      <label>Loan Amount ($)</label>
+      <input id="refi-inp-amount" type="number" placeholder="0">
+    </div>
+    <div class="refi-field">
+      <label>Rate (e.g. 3.375%)</label>
+      <input id="refi-inp-rate" placeholder="0.000%">
+    </div>
+    <div class="refi-field">
+      <label>Net Proceeds ($) — negative = cash-in</label>
+      <input id="refi-inp-proceeds" type="number" placeholder="0">
+    </div>
+    <div class="refi-modal-footer">
+      <button class="refi-cancel-btn" onclick="closeRefiModal()">Cancel</button>
+      <button class="refi-save-btn" onclick="saveRefiEntry()">Save</button>
     </div>
   </div>
 </div>
@@ -2029,7 +2086,7 @@ function openModal(id){
   document.getElementById('inp-giladPct').value=p.giladPct!=null?+(p.giladPct*100).toFixed(2):'';
   document.getElementById('m-refi-timeline').innerHTML=p.refi.length===0
     ?'<div style="color:var(--muted);font-size:12px;padding:10px 0">No refinancing history.</div>'
-    :p.refi.map(r=>`<div class="refi-entry"><div class="refi-dot"></div><div class="refi-date">${r.date}</div><div><div class="refi-info">${r.label}</div><div class="refi-amount">$${r.amount.toLocaleString()} @ ${r.rate}${r.proceeds?` · Proceeds: ${fmt$(r.proceeds)}`:''}</div></div></div>`).join('');
+    :p.refi.map((r,i)=>`<div class="refi-entry"><div class="refi-dot"></div><div class="refi-date">${r.date}</div><div class="refi-entry-body"><div class="refi-info">${r.label}</div><div class="refi-amount">$${r.amount.toLocaleString()} @ ${r.rate}${r.proceeds?` · Proceeds: ${fmt$(r.proceeds)}`:''}</div><div class="refi-actions"><button class="refi-btn" onclick="openRefiModal(${i})">Edit</button><button class="refi-btn del" onclick="deleteRefiEntry(${i})">Delete</button></div></div></div>`).join('');
   document.getElementById('modal-overlay').style.display='block';
   switchModalTab('inputs');
   updateCalculations();
@@ -2092,6 +2149,59 @@ function updateCalculations(){
 }
 
 function closeModal(e){if(!e||e.target.id==='modal-overlay')document.getElementById('modal-overlay').style.display='none';}
+
+/* ── Refi edit/add/delete ── */
+let _refiEditIdx=null;
+function openRefiModal(idx){
+  _refiEditIdx=idx;
+  const p=PROPS.find(x=>x.id===activeId);if(!p)return;
+  const isEdit=idx!==null&&idx>=0;
+  document.getElementById('refi-modal-title').textContent=isEdit?'Edit Refinance':'Add Refinance';
+  const r=isEdit?p.refi[idx]:{date:'',label:'',amount:'',rate:'',proceeds:''};
+  document.getElementById('refi-inp-date').value=r.date||'';
+  document.getElementById('refi-inp-label').value=r.label||'';
+  document.getElementById('refi-inp-amount').value=r.amount||'';
+  document.getElementById('refi-inp-rate').value=r.rate||'';
+  document.getElementById('refi-inp-proceeds').value=r.proceeds||'';
+  document.getElementById('refi-modal-overlay').classList.add('open');
+}
+function closeRefiModal(e){
+  if(e&&e.target.id!=='refi-modal-overlay')return;
+  document.getElementById('refi-modal-overlay').classList.remove('open');
+}
+function saveRefiEntry(){
+  const p=PROPS.find(x=>x.id===activeId);if(!p)return;
+  const entry={
+    date:document.getElementById('refi-inp-date').value.trim(),
+    label:document.getElementById('refi-inp-label').value.trim(),
+    amount:parseFloat(document.getElementById('refi-inp-amount').value)||0,
+    rate:document.getElementById('refi-inp-rate').value.trim(),
+    proceeds:parseFloat(document.getElementById('refi-inp-proceeds').value)||0
+  };
+  if(!entry.date||!entry.label){alert('Date and Label are required.');return;}
+  if(_refiEditIdx!==null&&_refiEditIdx>=0){
+    p.refi[_refiEditIdx]=entry;
+  } else {
+    p.refi.push(entry);
+  }
+  document.getElementById('refi-modal-overlay').classList.remove('open');
+  // re-render refi timeline
+  document.getElementById('m-refi-timeline').innerHTML=p.refi.length===0
+    ?'<div style="color:var(--muted);font-size:12px;padding:10px 0">No refinancing history.</div>'
+    :p.refi.map((r,i)=>`<div class="refi-entry"><div class="refi-dot"></div><div class="refi-date">${r.date}</div><div class="refi-entry-body"><div class="refi-info">${r.label}</div><div class="refi-amount">$${r.amount.toLocaleString()} @ ${r.rate}${r.proceeds?` · Proceeds: ${fmt$(r.proceeds)}`:''}</div><div class="refi-actions"><button class="refi-btn" onclick="openRefiModal(${i})">Edit</button><button class="refi-btn del" onclick="deleteRefiEntry(${i})">Delete</button></div></div></div>`).join('');
+  updateCalculations();
+  scheduleSave();
+}
+function deleteRefiEntry(idx){
+  const p=PROPS.find(x=>x.id===activeId);if(!p)return;
+  if(!confirm('Delete this refinance entry?'))return;
+  p.refi.splice(idx,1);
+  document.getElementById('m-refi-timeline').innerHTML=p.refi.length===0
+    ?'<div style="color:var(--muted);font-size:12px;padding:10px 0">No refinancing history.</div>'
+    :p.refi.map((r,i)=>`<div class="refi-entry"><div class="refi-dot"></div><div class="refi-date">${r.date}</div><div class="refi-entry-body"><div class="refi-info">${r.label}</div><div class="refi-amount">$${r.amount.toLocaleString()} @ ${r.rate}${r.proceeds?` · Proceeds: ${fmt$(r.proceeds)}`:''}</div><div class="refi-actions"><button class="refi-btn" onclick="openRefiModal(${i})">Edit</button><button class="refi-btn del" onclick="deleteRefiEntry(${i})">Delete</button></div></div></div>`).join('');
+  updateCalculations();
+  scheduleSave();
+}
 function switchModalTab(t){
   ['inputs','kpis','capital','refi'].forEach(k=>{
     document.getElementById('ms-'+k).classList.toggle('active',k===t);
