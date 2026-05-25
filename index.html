@@ -1139,7 +1139,6 @@ table.rc-table tbody td{padding:8px 14px;}
           <div class="computed-box"><div class="computed-lbl">Rent Roll</div><div class="computed-val" id="k-rent">—</div><div class="computed-hint">Annual gross rent</div></div>
           <div class="computed-box"><div class="computed-lbl">Expenses</div><div class="computed-val" id="k-exp">—</div><div class="computed-hint">Annual operating expenses</div></div>
           <div class="computed-box"><div class="computed-lbl">Mortgage</div><div class="computed-val" id="k-mtg">—</div><div class="computed-hint">Annual debt service</div></div>
-          <div class="computed-box"><div class="computed-lbl">Capital Invested</div><div class="computed-val" id="k-cap">—</div><div class="computed-hint">Total equity deployed</div></div>
           <div class="computed-box"><div class="computed-lbl">Equity Multiple <span class="tip-icon" tabindex="0">?<span class="tooltip-popup"><div class="tip-formula">Total Cash Received ÷ Capital Invested</div></span></span></div><div class="computed-val" id="k-eqmult">—</div><div class="computed-hint">Total cash returned / invested</div></div>
           <div class="computed-box"><div class="computed-lbl">IRR (Est.)</div><div class="computed-val" id="k-irr">—</div><div class="computed-hint">Cash flows + refi + terminal equity</div></div>
         </div>
@@ -1149,10 +1148,8 @@ table.rc-table tbody td{padding:8px 14px;}
       <div class="modal-section" id="ms-capital">
         <div style="font-size:10px;color:var(--muted);margin-bottom:14px;line-height:1.5;">Computed dynamically from inputs + distribution ledger. No stored value.</div>
         <div class="cap-breakdown">
-          <div class="cap-title">Capital Account Waterfall</div>
+          <div class="cap-title">Capital Account</div>
           <div class="cap-line"><span class="cap-line-lbl">Capital Invested</span><span class="cap-line-val" id="ca-invested">—</span></div>
-          <div class="cap-line"><span class="cap-line-lbl">+ Refi Proceeds (Net)</span><span class="cap-line-val" id="ca-refi">—</span></div>
-          <div class="cap-line"><span class="cap-line-lbl">+ Cumulative NOI (years held × annual NOI)</span><span class="cap-line-val" id="ca-cum-noi">—</span></div>
           <div class="cap-line"><span class="cap-line-lbl">− Distributions Paid (from ledger)</span><span class="cap-line-val" id="ca-dists">—</span></div>
           <div class="cap-line"><span class="cap-line-lbl">= Capital Account Balance</span><span class="cap-line-val" id="ca-total">—</span></div>
         </div>
@@ -1863,7 +1860,8 @@ function calcCapitalAccount(p){
   const noi=calculateNOI(p.rentRoll,p.expenses,p.mtgYearly);
   const refi=p.refi.reduce((s,r)=>s+(r.proceeds||0),0);
   const dists=DISTS.filter(d=>d.propId===p.id).reduce((s,d)=>s+d.amount,0);
-  return{invested:p.capital,refi,cumulativeNOI:noi*yh,distributions:dists,total:p.capital+refi+noi*yh-dists,yearsHeld:yh};
+  // Capital Account = Capital Invested − Total Distributions
+  return{invested:p.capital,refi,cumulativeNOI:noi*yh,distributions:dists,total:p.capital-dists,yearsHeld:yh};
 }
 
 function getPropDistTotal(propId){
@@ -1913,6 +1911,7 @@ const fmtM=v=>`$${(v/1000000).toFixed(2)}M`;
 const fmtK=v=>`$${(v/1000).toFixed(0)}k`;
 const fmtPct=v=>v==null||isNaN(v)?'N/A':(v*100).toFixed(1)+'%';
 const fmtX=v=>v==null||isNaN(v)?'N/A':v.toFixed(2)+'x';
+const fmtN=v=>v==null||isNaN(v)?'N/A':v.toFixed(2);
 const rateClr=r=>r<0.04?'green':r>0.055?'red':'warn';
 const cocClr=c=>c==null?'blue':c>=0.10?'green':c>=0.05?'warn':'red';
 const dscrClr=d=>d==null?'blue':d>=1.25?'green':d>=1.0?'warn':'red';
@@ -1977,7 +1976,7 @@ function updateExecSnapshot(){
   document.getElementById('es-total-equity').textContent=fmtM(totalEquity);
   document.getElementById('es-annual-cf').textContent=fmt$(annualCF);
   document.getElementById('es-blended').textContent=fmtPct(blendedWt);
-  document.getElementById('es-eq-multiple').textContent=fmtX(eqMult);
+  document.getElementById('es-eq-multiple').textContent=fmtN(eqMult);
 }
 
 // ══════════════════════════════════════════════════
@@ -2021,12 +2020,12 @@ function buildPropCards(){
       </div>
       <div class="card-metrics">
         <div class="metric" onclick="openModal('${p.id}')">
-          <div class="metric-val ${k.monthlyNOI>=0?'green':'red'}">${fmt$(k.monthlyNOI)} <span class="tip-icon" tabindex="0">?<span class="tooltip-popup" style="bottom:calc(100% + 30px)">Monthly net after all costs.<div class="tip-formula">(Rent − Exp − Mtg) ÷ 12</div></span></span></div>
-          <div class="metric-lbl">Mo. NOI</div>
+          <div class="metric-val ${k.monthlyNOI>=0?'green':'red'}">${fmt$(k.annualNOI)} <span class="tip-icon" tabindex="0">?<span class="tooltip-popup" style="bottom:calc(100% + 30px)">Annual net after all costs.<div class="tip-formula">Rent − Exp − Mtg</div></span></span></div>
+          <div class="metric-lbl">Yearly NOI</div>
         </div>
         <div class="metric" onclick="openModal('${p.id}')">
           <div class="metric-val ${rateClr(p.rate)}">${fmtPct(p.rate)} <span class="tip-icon" tabindex="0">?<span class="tooltip-popup" style="bottom:calc(100% + 30px)">Current mortgage interest rate.</span></span></div>
-          <div class="metric-lbl">Rate</div>
+          <div class="metric-lbl">Interest Rate</div>
         </div>
         <div class="metric" onclick="openModal('${p.id}')">
           <div class="metric-val ${cocClr(k.coc)}">${fmtPct(k.coc)} <span class="tip-icon" tabindex="0">?<span class="tooltip-popup" style="bottom:calc(100% + 30px)">Cash-on-cash return.<div class="tip-formula">Annual NOI ÷ Capital</div></span></span></div>
@@ -2126,7 +2125,7 @@ function updateCalculations(){
   set('c-coc',fmtPct(k.coc),cColor);
   set('c-dscr',fmtX(k.dscr),dColor);
   set('c-ltv',fmtPct(k.ltv),lColor);
-  set('c-eqmult',fmtX(k.eqMult),k.eqMult>=1.5?'var(--accent2)':k.eqMult>=1.0?'var(--warn)':'var(--danger)');
+  set('c-eqmult',fmtN(k.eqMult),k.eqMult>=1.5?'var(--accent2)':k.eqMult>=1.0?'var(--warn)':'var(--danger)');
   set('c-irr',k.irr!==null?fmtPct(k.irr):'N/A');
   set('k-noi-mo',fmt$(k.monthlyNOI),nColor);
   set('k-noi-yr',fmt$(k.annualNOI));
@@ -2136,12 +2135,9 @@ function updateCalculations(){
   set('k-rent',fmt$(p.rentRoll));
   set('k-exp',fmt$(p.expenses));
   set('k-mtg',fmt$(p.mtgYearly));
-  set('k-cap',fmt$(p.capital));
-  set('k-eqmult',fmtX(k.eqMult));
+  set('k-eqmult',fmtN(k.eqMult));
   set('k-irr',k.irr!==null?fmtPct(k.irr):'N/A');
   set('ca-invested',fmt$(ca.invested));
-  set('ca-refi',fmt$(ca.refi));
-  set('ca-cum-noi',fmt$(ca.cumulativeNOI));
   set('ca-dists',fmt$(-ca.distributions));
   const caTot=document.getElementById('ca-total');
   if(caTot){caTot.textContent=fmt$(ca.total);caTot.style.color=ca.total>=0?'var(--accent2)':'var(--danger)';}
